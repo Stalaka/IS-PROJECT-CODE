@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requests</title>
+     <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2 class="logo">Material Procurement Tracker</h2>
+      <nav>
+        <ul>
+          <li><a href="#">Dashboard</a></li>
+          <li><a href="#">Account</a></li>
+          <li><a href="#">Purchase Order</a></li>
+          <li><a href="#" class="active">Requests</a></li>
+          <li><a href="#">Settings</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="header-flex">
+        <h1>Material Requests</h1>
+        <button class="btn-create">+ New Request</button>
+      </div>
+
+      <div class="table-section">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Item</th>
+              <th>Quantity</th>
+              <th>Requested By</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#R101</td>
+              <td>Cover Laminate</td>
+              <td>300</td>
+              <td>Felista</td>
+              <td><span class="status approved">Approved</span></td>
+              <td>2025-06-20</td>
+            </tr>
+            <tr>
+              <td>#R102</td>
+              <td>RF Chips</td>
+              <td>100</td>
+              <td>Stephanie</td>
+              <td><span class="status pending">Pending</span></td>
+              <td>2025-06-22</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
