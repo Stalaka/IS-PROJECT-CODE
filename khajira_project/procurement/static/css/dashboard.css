@@ -124,6 +124,7 @@ body, html {
     padding: 20px;
   }
 }
+
 .dashboard-layout {
   display: flex;
   gap: 20px;
@@ -219,4 +220,42 @@ body, html {
 .status.pending {
   background-color: #fff3cd;
   color: #856404;
+}
+.form-section {
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 500px;
+}
+
+.form-section label {
+  font-weight: bold;
+}
+
+.form-section input, .form-section select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+.card-link {
+  display: block;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  font-size: 18px;
+  color: #0b2545;
+  text-decoration: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.card-link:hover {
+  transform: translateY(-5px);
+  background-color: #f3faff;
 }

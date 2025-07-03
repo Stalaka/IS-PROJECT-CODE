@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2 class="logo">Material Procurement System</h2>
+      <li><a href="{% url 'logout' %}">Logout</a></li>
+      <nav>
+  <ul>
+    <li><a href="/dashboard" class="active">Dashboard</a></li>
+    <li><a href="/account">Account</a></li>
+    <li><a href="/purchase-orders">Purchase Order</a></li>
+    <li><a href="/requests">Requests</a></li>
+    <li><a href="/settings">Settings</a></li>
+  </ul>
+</nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <h1 class="page-title">Dashboard</h1>
+
+      <!-- Cards Section -->
+       <div class="card-grid">
+  <div class="card-link">Total Requests: {{ total_requests }}</div>
+  <div class="card-link">Approved: {{ approved_requests }}</div>
+  <div class="card-link">Pending: {{ pending_requests }}</div>
+  <div class="card-link">Orders: {{ purchase_orders }}</div>
+</div>
+
+
+      <!-- Notification Section -->
+      <div class="notifications">
+        <h2>System Notifications</h2>
+        <p>No new notifications at this time.</p>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
+
