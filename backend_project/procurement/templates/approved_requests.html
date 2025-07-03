@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Approved Requests{% endblock %}
+
+{% block content %}
+  <h2>Approved Requests</h2>
+  <ul>
+    {% for req in data %}
+      <li>{{ req.item_name }} - Approved on {{ req.date_requested }}</li>
+    {% empty %}
+      <li>No approved requests.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

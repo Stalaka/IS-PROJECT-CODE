@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+  <h1 class="page-title">Dashboard</h1>
+
+  <!-- Cards Section -->
+  <div class="card-grid">
+    <div class="card-link">Total Requests: {{ total_requests }}</div>
+    <div class="card-link">Approved: {{ approved_requests }}</div>
+    <div class="card-link">Pending: {{ pending_requests }}</div>
+    <div class="card-link">Orders: {{ purchase_orders }}</div>
+  </div>
+
+  <!-- Notifications Section -->
+  <h2 class="page-title">System Notifications</h2>
+  <div class="notifications">
+    <ul>
+      {% for note in notifications %}
+        <li>{{ note.message }}</li>
+      {% empty %}
+        <li>No notifications at this time.</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}

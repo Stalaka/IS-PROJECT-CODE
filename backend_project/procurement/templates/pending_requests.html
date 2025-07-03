@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Pending Requests</h2>
+
+  {% if data %}
+    <ul>
+      {% for request in data %}
+        <li>{{ request.item_name }} - Quantity: {{ request.quantity }} - Requested by: {{ request.requester.username }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No pending requests.</p>
+  {% endif %}
+{% endblock %}
