@@ -2,7 +2,7 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-  <h1 class="page-title">Dashboard</h1>
+  <h1 class="page-title">Procurement Dashboard</h1>
 
   <!-- Cards Section -->
   <div class="card-grid">
@@ -16,11 +16,14 @@
   <h2 class="page-title">System Notifications</h2>
   <div class="notifications">
     <ul>
-      {% for note in notifications %}
-        <li>{{ note.message }}</li>
-      {% empty %}
+      {% if notifications %}
+        {% for note in notifications %}
+          <li>{{ note }}</li>
+        {% endfor %}
+      {% else %}
         <li>No notifications at this time.</li>
-      {% endfor %}
+      {% endif %}
     </ul>
   </div>
 {% endblock %}
+
