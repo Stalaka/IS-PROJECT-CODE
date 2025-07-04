@@ -9,11 +9,12 @@
   <div class="login-container">
     <h2>Login</h2>
 
-    {% if form.errors %}
-      <p style="color: red;">Invalid username or password</p>
+    {% if messages %}
+      {% for message in messages %}
+        <p style="color: red;">{{ message }}</p>
+      {% endfor %}
     {% endif %}
-
-    <form method="post" action="{% url 'login' %}">
+     <form method="post" action="{% url 'login' %}">
       {% csrf_token %}
       <label for="username">Username</label>
       <input type="text" name="username" required>
@@ -26,4 +27,8 @@
   </div>
 </body>
 </html>
+
+
+
+
 

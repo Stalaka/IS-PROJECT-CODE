@@ -1,7 +1,44 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Request, PurchaseOrder
+from django.contrib.auth.models import User, Group
+from django.contrib import messages
+from django.urls import reverse_lazy
+from django.shortcuts import render, redirect
+from django.contrib.auth.views import LoginView
 
+from .models import Request, PurchaseOrder
+from .forms import RequestForm, PurchaseOrderForm
+
+# --- Custom Login View ---
+class CustomLoginView(LoginView):
+    template_name = 'login.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.method == "GET":
+            messages.info(request, "You are already logged into the system.")
+            return redirect('dashboard')
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        user = form.get_user()
+        allowed_roles = ['Admin', 'ProcurementOfficer', 'Supplier']
+        print("User groups:", list(user.groups.values_list('name', flat=True)))
+        if not user.groups.filter(name__in=allowed_roles).exists():
+            messages.error(self.request, "Access denied. You are not authorized.")
+            return redirect('login')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        user = self.request.user
+        if user.groups.filter(name='Admin').exists():
+            return reverse_lazy('dashboard')
+        elif user.groups.filter(name='Supplier').exists():
+            return reverse_lazy('purchase_order_list')
+        elif user.groups.filter(name='ProcurementOfficer').exists():
+            return reverse_lazy('request_list')
+        return reverse_lazy('dashboard')
+
+
+# --- Views ---
 @login_required
 def dashboard(request):
     total_requests = Request.objects.count()
@@ -9,7 +46,6 @@ def dashboard(request):
     pending_requests = Request.objects.filter(status='pending').count()
     purchase_orders = PurchaseOrder.objects.count()
 
-    # Temporary hardcoded notifications 
     notifications = [
         "✅ Order #002 has been approved",
         "⚠️ Low stock alert: Passport Paper",
@@ -22,42 +58,32 @@ def dashboard(request):
         'approved_requests': approved_requests,
         'pending_requests': pending_requests,
         'purchase_orders': purchase_orders,
-        'notifications': notifications  
+        'notifications': notifications
     })
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Request
 
 @login_required
 def request_list(request):
     requests = Request.objects.all()
     return render(request, 'requests.html', {'requests': requests})
 
-from .models import PurchaseOrder  
 
 @login_required
 def purchase_order_list(request):
     orders = PurchaseOrder.objects.all()
     return render(request, 'purchase_orders.html', {'orders': orders})
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 
 @login_required
 def account_list(request):
-    return render(request, 'accounts.html')  
+    users = User.objects.all()
+    return render(request, 'account.html', {'users': users})
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 
 @login_required
 def settings_page(request):
-    return render(request, 'settings.html') 
+    return render(request, 'settings.html')
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from .forms import RequestForm
 
 @login_required
 def new_request(request):
@@ -72,9 +98,6 @@ def new_request(request):
         form = RequestForm()
     return render(request, 'new_request.html', {'form': form})
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from .forms import PurchaseOrderForm
 
 @login_required
 def new_order(request):
@@ -87,11 +110,10 @@ def new_order(request):
         form = PurchaseOrderForm()
     return render(request, 'new_order.html', {'form': form})
 
-from django.contrib.auth.decorators import login_required
-from .models import Request
-from django.shortcuts import render
 
 @login_required
 def approved_requests(request):
     data = Request.objects.filter(status='approved')
     return render(request, 'approved_requests.html', {'data': data})
+
+
