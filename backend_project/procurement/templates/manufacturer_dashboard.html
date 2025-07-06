@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manufacturer Dashboard{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/manufacturer.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="manufacturer-dashboard">
+  <h2>👷‍♂️ Production Material Needs</h2>
+  {% if materials_needed %}
+    <ul class="materials-list">
+      {% for item in materials_needed %}
+        <li>
+          <strong>Material:</strong> {{ item.material_type }} |
+          <strong>Quantity:</strong> {{ item.quantity }} units |
+          <strong>Required by:</strong> {{ item.required_by|default:"N/A" }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No material requests found.</p>
+  {% endif %}
+
+  <h2>🚚 Delivery and Completion Status</h2>
+  {% if deliveries %}
+    <ul class="delivery-list">
+      {% for order in deliveries %}
+        <li>
+          <strong>Order #{{ order.id }}</strong> |
+          <strong>Material:</strong> {{ order.material_type }} |
+          <strong>Status:</strong> {{ order.status|title }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No delivery records found.</p>
+  {% endif %}
+</div>
+{% endblock %}
+

@@ -1,31 +1,41 @@
 from django.contrib import admin
 from django.urls import path
-from django.contrib.auth import views as auth_views
-from procurement.views import CustomLoginView  
-from procurement import views as procurement_views
+from django.contrib.auth.views import LogoutView
+from procurement.views import (
+    CustomLoginView,
+    dashboard,
+    manufacturer_dashboard,
+    request_list,
+    purchase_order_list,
+    approved_requests,
+    new_request,
+    new_order,
+    account_list,
+    api_request_list,
+)
 
 urlpatterns = [
     # Admin Panel
     path('admin/', admin.site.urls),
 
-    # Authentication 
+    # Authentication
     path('login/', CustomLoginView.as_view(), name='login'),
-    # Dashboard (Home)
-    path('', procurement_views.dashboard, name='dashboard'),
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
 
-    # Other Views
-    path('requests/', procurement_views.request_list, name='request_list'),
-    path('purchase-orders/', procurement_views.purchase_order_list, name='purchase_order_list'),
-    path('accounts/', procurement_views.account_list, name='account_list'),
-    path('settings/', procurement_views.settings_page, name='settings'),
+    # Dashboards
+    path('', dashboard, name='dashboard'),
+    path('manufacturer-dashboard/', manufacturer_dashboard, name='manufacturer_dashboard'),
 
-    # Form Views
-    path('requests/new/', procurement_views.new_request, name='new_request'),
-    path('orders/new/', procurement_views.new_order, name='new_order'),
-    path('requests/approved/', procurement_views.approved_requests, name='approved_requests'),
+    # Request and Order Views
+    path('requests/', request_list, name='request_list'),
+    path('purchase-orders/', purchase_order_list, name='purchase_order_list'),
+    path('requests/approved/', approved_requests, name='approved_requests'),
+    path('requests/new/', new_request, name='new_request'),
+    path('orders/new/', new_order, name='new_order'),
+
+    # Account Management
+    path('accounts/', account_list, name='account_list'),
+
+    # API Endpoint for Postman test
+    path('api/requests/', api_request_list, name='api_request_list'),
 ]
-
-from django.contrib.auth.views import LogoutView
-
-path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
-

@@ -5,8 +5,13 @@ from django.urls import reverse_lazy
 from django.shortcuts import render, redirect
 from django.contrib.auth.views import LoginView
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 from .models import Request, PurchaseOrder
 from .forms import RequestForm, PurchaseOrderForm
+from .serializers import RequestSerializer  # 👈 Add this line
+
 
 # --- Custom Login View ---
 class CustomLoginView(LoginView):
@@ -20,7 +25,7 @@ class CustomLoginView(LoginView):
 
     def form_valid(self, form):
         user = form.get_user()
-        allowed_roles = ['Admin', 'ProcurementOfficer', 'Supplier']
+        allowed_roles = ['Admin', 'ProcurementOfficer', 'Supplier', 'Manufacturer']
         print("User groups:", list(user.groups.values_list('name', flat=True)))
         if not user.groups.filter(name__in=allowed_roles).exists():
             messages.error(self.request, "Access denied. You are not authorized.")
@@ -31,14 +36,27 @@ class CustomLoginView(LoginView):
         user = self.request.user
         if user.groups.filter(name='Admin').exists():
             return reverse_lazy('dashboard')
-        elif user.groups.filter(name='Supplier').exists():
-            return reverse_lazy('purchase_order_list')
         elif user.groups.filter(name='ProcurementOfficer').exists():
             return reverse_lazy('request_list')
+        elif user.groups.filter(name='Supplier').exists():
+            return reverse_lazy('purchase_order_list')
+        elif user.groups.filter(name='Manufacturer').exists():
+            return reverse_lazy('manufacturer_dashboard')
         return reverse_lazy('dashboard')
 
 
-# --- Views ---
+# --- Manufacturer Dashboard View ---
+@login_required
+def manufacturer_dashboard(request):
+    materials_needed = Request.objects.filter(status='approved')
+    deliveries = PurchaseOrder.objects.all()
+    return render(request, 'manufacturer_dashboard.html', {
+        'materials_needed': materials_needed,
+        'deliveries': deliveries
+    })
+
+
+# --- Other Views ---
 @login_required
 def dashboard(request):
     total_requests = Request.objects.count()
@@ -81,11 +99,6 @@ def account_list(request):
 
 
 @login_required
-def settings_page(request):
-    return render(request, 'settings.html')
-
-
-@login_required
 def new_request(request):
     if request.method == 'POST':
         form = RequestForm(request.POST)
@@ -116,4 +129,11 @@ def approved_requests(request):
     data = Request.objects.filter(status='approved')
     return render(request, 'approved_requests.html', {'data': data})
 
+
+# --- ✅ API Endpoint: List all procurement requests ---
+@api_view(['GET'])
+def api_request_list(request):
+    requests = Request.objects.all()
+    serializer = RequestSerializer(requests, many=True)
+    return Response(serializer.data)
 
