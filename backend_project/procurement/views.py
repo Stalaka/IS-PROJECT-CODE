@@ -2,15 +2,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.urls import reverse_lazy
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Request, PurchaseOrder
-from .forms import RequestForm, PurchaseOrderForm
-from .serializers import RequestSerializer  # 👈 Add this line
+from .models import Request, PurchaseOrder, ProductionUpdate
+from .forms import RequestForm, PurchaseOrderForm, ProductionUpdateForm
+from .serializers import RequestSerializer
 
 
 # --- Custom Login View ---
@@ -26,7 +26,6 @@ class CustomLoginView(LoginView):
     def form_valid(self, form):
         user = form.get_user()
         allowed_roles = ['Admin', 'ProcurementOfficer', 'Supplier', 'Manufacturer']
-        print("User groups:", list(user.groups.values_list('name', flat=True)))
         if not user.groups.filter(name__in=allowed_roles).exists():
             messages.error(self.request, "Access denied. You are not authorized.")
             return redirect('login')
@@ -50,13 +49,53 @@ class CustomLoginView(LoginView):
 def manufacturer_dashboard(request):
     materials_needed = Request.objects.filter(status='approved')
     deliveries = PurchaseOrder.objects.all()
+    updates = ProductionUpdate.objects.filter(manufacturer=request.user)
+
     return render(request, 'manufacturer_dashboard.html', {
         'materials_needed': materials_needed,
-        'deliveries': deliveries
+        'deliveries': deliveries,
+        'updates': updates,
     })
 
 
-# --- Other Views ---
+# --- Manufacturer Production Update Submission View ---
+@login_required
+def update_production_status(request, order_id):
+    if request.method == 'POST':
+        deadline = request.POST.get('deadline')
+        status = request.POST.get('status')
+
+        order = get_object_or_404(PurchaseOrder, id=order_id)
+        update, created = ProductionUpdate.objects.get_or_create(
+            order=order,
+            manufacturer=request.user
+        )
+        update.production_deadline = deadline
+        update.completion_status = status
+        update.save()
+
+        messages.success(request, f"Production status for Order #{order_id} updated.")
+    return redirect('manufacturer_dashboard')
+
+
+# --- Form-Based Update View ---
+@login_required
+def update_production(request):
+    if request.method == 'POST':
+        form = ProductionUpdateForm(request.POST)
+        if form.is_valid():
+            update = form.save(commit=False)
+            update.manufacturer = request.user
+            update.save()
+            messages.success(request, "Production update saved.")
+            return redirect('manufacturer_dashboard')
+    else:
+        form = ProductionUpdateForm()
+
+    return render(request, 'update_production.html', {'form': form})
+
+
+# --- Dashboard View ---
 @login_required
 def dashboard(request):
     total_requests = Request.objects.count()
@@ -65,10 +104,10 @@ def dashboard(request):
     purchase_orders = PurchaseOrder.objects.count()
 
     notifications = [
-        "✅ Order #002 has been approved",
-        "⚠️ Low stock alert: Passport Paper",
-        "📩 New request submitted by Felista",
-        "📦 Delivery confirmation from GlobalPrint Ltd",
+        " Order #002 has been approved",
+        " Low stock alert: Passport Paper",
+        "New request submitted by Felista",
+        "Delivery confirmation from GlobalPrint Ltd",
     ]
 
     return render(request, 'procurement.html', {
@@ -130,10 +169,11 @@ def approved_requests(request):
     return render(request, 'approved_requests.html', {'data': data})
 
 
-# --- ✅ API Endpoint: List all procurement requests ---
+# --- API Endpoint: List all procurement requests ---
 @api_view(['GET'])
 def api_request_list(request):
     requests = Request.objects.all()
     serializer = RequestSerializer(requests, many=True)
     return Response(serializer.data)
+
 

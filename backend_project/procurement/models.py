@@ -1,11 +1,8 @@
 from django.db import models
-
-# Create your models here.
 from django.contrib.auth.models import User
 
+# --- Material Request Model ---
 class Request(models.Model):
-    """Model to represent material requests made by system users."""
-
     REQUEST_STATUS = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
@@ -26,9 +23,8 @@ class Request(models.Model):
         verbose_name_plural = "Material Requests"
 
 
+# --- Purchase Order Model ---
 class PurchaseOrder(models.Model):
-    """Model to represent purchase orders sent to suppliers."""
-
     ORDER_STATUS = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
@@ -47,3 +43,33 @@ class PurchaseOrder(models.Model):
     class Meta:
         verbose_name = "Purchase Order"
         verbose_name_plural = "Purchase Orders"
+
+
+# --- Manufacturer Production Update Model ---
+class ProductionUpdate(models.Model):
+    COMPLETION_STATUS = [
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('delayed', 'Delayed'),
+    ]
+
+    order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
+    manufacturer = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    # Additional timeline fields
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    is_completed = models.BooleanField(default=False)
+
+    production_deadline = models.DateField()
+    completion_status = models.CharField(max_length=20, choices=COMPLETION_STATUS)
+    notes = models.TextField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Production update for Order #{self.order.id}"
+
+    class Meta:
+        verbose_name = "Production Update"
+        verbose_name_plural = "Production Updates"
+

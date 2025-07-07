@@ -28,3 +28,19 @@ ul.delivery-list li {
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   font-size: 15px;
 }
+
+.production-form {
+  background: #fdfdfd;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
+}
+
+.messages {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #ffecec;
+  border: 1px solid #ffb3b3;
+  border-radius: 5px;
+  color: #b30000;
+}

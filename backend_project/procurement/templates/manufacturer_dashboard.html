@@ -8,14 +8,28 @@
 
 {% block content %}
 <div class="manufacturer-dashboard">
+
   <h2>👷‍♂️ Production Material Needs</h2>
+
+  <!-- Link to standalone production update form -->
+  <a href="{% url 'update_production' %}" class="btn-update"> Update Production</a>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <p>{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   {% if materials_needed %}
     <ul class="materials-list">
       {% for item in materials_needed %}
         <li>
-          <strong>Material:</strong> {{ item.material_type }} |
+          <strong>Request ID:</strong> {{ item.id }} |
+          <strong>Material:</strong> {{ item.item_name }} |
           <strong>Quantity:</strong> {{ item.quantity }} units |
-          <strong>Required by:</strong> {{ item.required_by|default:"N/A" }}
+          <strong>Required By:</strong> {{ item.required_by|default:"N/A" }}
         </li>
       {% endfor %}
     </ul>
@@ -24,13 +38,30 @@
   {% endif %}
 
   <h2>🚚 Delivery and Completion Status</h2>
+
   {% if deliveries %}
     <ul class="delivery-list">
       {% for order in deliveries %}
-        <li>
-          <strong>Order #{{ order.id }}</strong> |
-          <strong>Material:</strong> {{ order.material_type }} |
-          <strong>Status:</strong> {{ order.status|title }}
+        <li style="margin-bottom: 20px;">
+          <strong>Order ID:</strong> {{ order.id }} |
+          <strong>Material:</strong> {{ order.item_name }} |
+          <strong>Quantity:</strong> {{ order.quantity }} |
+          <strong>Price:</strong> KES {{ order.price|default:"N/A" }} |
+          <strong>Status:</strong> {{ order.status|title }} |
+          <strong>Production Deadline:</strong> {{ order.productionupdate.production_deadline|default:"Not set" }}
+
+          <!-- Inline form to update deadline and status -->
+          <form method="post" action="{% url 'update_production_status' order.id %}" class="production-form">
+            {% csrf_token %}
+            <label for="deadline_{{ order.id }}">Deadline:</label>
+            <input type="date" name="deadline" id="deadline_{{ order.id }}" required>
+            <label for="status_{{ order.id }}">Status:</label>
+            <select name="status" id="status_{{ order.id }}">
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+            <button type="submit">Update</button>
+          </form>
         </li>
       {% endfor %}
     </ul>
@@ -39,4 +70,7 @@
   {% endif %}
 </div>
 {% endblock %}
+
+
+
 
