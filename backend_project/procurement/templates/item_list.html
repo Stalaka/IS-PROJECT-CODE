@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>📦 Item List</h2>
+<a href="{% url 'add_item' %}">+ Add New Item</a>
+<tableborder="1">
+  <tr>
+    <th>Name</th>
+    <th>Current Rate</th>
+    <th>Updated At</th>
+    <th>Action</th>
+  </tr>
+  {% for item in items %}
+  <tr>
+    <td>{{ item.name }}</td>
+    <td>KES {{ item.current_rate }}</td>
+    <td>{{ item.updated_at }}</td>
+    <td><a href="{% url 'update_rate' item.id %}">Update Rate</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
