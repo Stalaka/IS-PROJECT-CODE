@@ -20,6 +20,7 @@ urlpatterns = [
     # Manufacturer Updates
     path('manufacturer/update/', procurement_views.update_production, name='update_production'),
     path('manufacturer/update/<int:order_id>/', procurement_views.update_production_status, name='update_production_status'),
+    path('manufacturer/update/', procurement_views.update_production, name='update_production'),
 
     # Requests and Orders
     path('requests/', procurement_views.request_list, name='request_list'),
@@ -41,4 +42,7 @@ urlpatterns = [
 
     # Vendor Management
     path('vendors/', procurement_views.vendor_list, name='vendor_list'),
+
+
+
 ]
