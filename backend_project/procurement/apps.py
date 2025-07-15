@@ -6,7 +6,6 @@ class ProcurementConfig(AppConfig):
 
     def ready(self):
         from django.contrib.auth.models import Group
-        allowed_roles = ['Admin', 'ProcurementOfficer', 'Supplier']
-        for role in allowed_roles:
+        roles = ['Administrator', 'Supplier', 'Manufacturer', 'Procurement Officer']
+        for role in roles:
             Group.objects.get_or_create(name=role)
-

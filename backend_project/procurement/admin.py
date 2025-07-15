@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Request, PurchaseOrder, ProductionUpdate, Item, RateHistory, Vendor
+from .models import Request, PurchaseOrder, ProductionUpdate, Item, RateHistory
 
 @admin.register(Request)
 class RequestAdmin(admin.ModelAdmin):
@@ -39,11 +39,6 @@ class RateHistoryAdmin(admin.ModelAdmin):
     list_filter = ('changed_at', 'changed_by')
     readonly_fields = ('changed_at',)
 
-@admin.register(Vendor)
-class VendorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_active')
-    search_fields = ('name',)
-    list_filter = ('is_active',)
 
 
 

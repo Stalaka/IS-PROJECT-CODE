@@ -23,18 +23,6 @@ class RateHistory(models.Model):
         return f"{self.item.name} changed on {self.changed_at.strftime('%Y-%m-%d')}"
 
 
-# --- Vendor (External supplier data only, not a user) ---
-class Vendor(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    contact_email = models.EmailField(blank=True, null=True)
-    product_type = models.CharField(max_length=100, blank=True)
-    contact_info = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.name
-
-
 # --- Material Request Model ---
 class Request(models.Model):
     REQUEST_STATUS = [
@@ -67,12 +55,15 @@ class PurchaseOrder(models.Model):
 
     item_name = models.CharField(max_length=100)
     quantity = models.PositiveIntegerField()
-    supplier = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+
+    # ✅ Supplier field added back
+    supplier = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
     status = models.CharField(max_length=10, choices=ORDER_STATUS, default='pending')
     order_date = models.DateField(auto_now_add=True)
     purchase_document = models.FileField(upload_to='purchase_docs/', null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self):  
         return f"{self.item_name} ({self.status})"
 
     class Meta:
@@ -115,8 +106,3 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.timestamp.strftime('%Y-%m-%d %H:%M')} - {self.user} - {self.action}"
-
-
-
-
-

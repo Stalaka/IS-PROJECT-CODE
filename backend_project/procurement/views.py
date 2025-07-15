@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .models import (
-    Item, RateHistory, Vendor, AuditLog,
+    Item, RateHistory, AuditLog,
     Request, PurchaseOrder, ProductionUpdate
 )
 from .forms import (
@@ -99,11 +99,6 @@ def update_rate(request, item_id):
         form = RateUpdateForm(initial={'new_rate': item.current_rate})
     return render(request, 'update_rate.html', {'form': form, 'item': item})
 
-# --- Admin: View Vendor List ---
-@login_required
-def vendor_list(request):
-    vendors = Vendor.objects.all()
-    return render(request, 'vendor_list.html', {'vendors': vendors})
 
 # --- Manufacturer Dashboard View ---
 @login_required

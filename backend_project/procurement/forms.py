@@ -33,13 +33,13 @@ class ProductionUpdateForm(forms.ModelForm):
         }
 
 
-# ✅ This fixes the missing import error
+# This fixes the missing import error
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
         fields = ['name', 'current_rate']
 
 
-# ✅ Also define this as it's being imported in your views
+#  Also define this as it's being imported in your views
 class RateUpdateForm(forms.Form):
     new_rate = forms.DecimalField(max_digits=10, decimal_places=2)

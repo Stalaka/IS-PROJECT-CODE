@@ -40,8 +40,6 @@ urlpatterns = [
     path('items/add/', procurement_views.add_item, name='add_item'),
     path('items/<int:item_id>/update/', procurement_views.update_rate, name='update_rate'),
 
-    # Vendor Management
-    path('vendors/', procurement_views.vendor_list, name='vendor_list'),
 
 
 
