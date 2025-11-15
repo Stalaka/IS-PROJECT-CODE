@@ -9,13 +9,24 @@ urlpatterns = [
     # Admin Panel
     path('admin/', admin.site.urls),
 
-    # --- API Endpoints (Must match Android ProcurementApiService.kt exactly) ---
+    # ==========================================
+    #       MOBILE APP API ENDPOINTS
+    # ==========================================
     path('api/login/', procurement_views.api_login, name='api_login'),
     path('api/procure/', procurement_views.api_procure, name='api_procure'),
-    
-    # ✅ FIXED: Changed from 'api/requests/' to 'api/user/orders/' to match Kotlin
     path('api/user/orders/', procurement_views.api_request_list, name='api_request_list'),
+    
+    # ✅ NEW: Endpoint for the Purchase Orders List Screen
+    path('api/purchase-orders/', procurement_views.api_purchase_order_list, name='api_purchase_order_list'),
 
+    # ✅ NEW: Endpoint for Updating Order Status (Clickable Button)
+    path('api/orders/<int:order_id>/update/', procurement_views.api_update_status, name='api_update_status'),
+
+
+    # ==========================================
+    #           WEB VIEWS
+    # ==========================================
+    
     # Authentication (Web)
     path('login/', procurement_views.CustomLoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),

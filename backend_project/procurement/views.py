@@ -18,6 +18,10 @@ from .forms import (
     RequestForm, PurchaseOrderForm
 )
 
+# ==========================================
+#           WEB VIEWS (For Browser)
+# ==========================================
+
 # --- Custom Login View with Role-Based Redirect ---
 class CustomLoginView(LoginView):
     template_name = 'login.html'
@@ -208,6 +212,7 @@ def account_list(request):
     users = User.objects.all().order_by('username')
     return render(request, 'account.html', {'users': users})
 
+
 # ==========================================
 #       MOBILE APP API ENDPOINTS
 # ==========================================
@@ -253,6 +258,22 @@ def api_request_list(request):
         
     return JsonResponse(data, safe=False)
 
+# --- API: Return Purchase Orders as JSON ---
+def api_purchase_order_list(request):
+    orders = PurchaseOrder.objects.all()
+    
+    data = []
+    for order in orders:
+        data.append({
+            'order_id': order.id,
+            'item_name': order.item_name,  
+            'quantity': order.quantity,
+            'status': getattr(order, 'status', 'Ordered'), 
+            'supplier': str(order.supplier) if hasattr(order, 'supplier') else 'Unknown'
+        })
+        
+    return JsonResponse(data, safe=False)
+
 # --- API: Submit Procurement Request ---
 @csrf_exempt
 def api_procure(request):
@@ -280,6 +301,27 @@ def api_procure(request):
             
             return JsonResponse({'message': 'Request created successfully', 'id': new_req.id})
             
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'POST request required'}, status=405)
+
+# --- API: Update Order Status ---
+@csrf_exempt
+def api_update_status(request, order_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            new_status = data.get('status')
+            
+            # Find the request by ID
+            order = Request.objects.get(id=order_id)
+            order.status = new_status
+            order.save()
+            
+            return JsonResponse({'message': 'Status updated successfully'})
+        except Request.DoesNotExist:
+            return JsonResponse({'error': 'Order not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
 
