@@ -1,9 +1,13 @@
+import json
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User, Group
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import (
     Item, RateHistory, AuditLog,
@@ -11,7 +15,7 @@ from .models import (
 )
 from .forms import (
     ItemForm, RateUpdateForm, ProductionUpdateForm,
-    RequestForm
+    RequestForm, PurchaseOrderForm
 )
 
 # --- Custom Login View with Role-Based Redirect ---
@@ -180,8 +184,6 @@ def purchase_order_list(request):
     orders = PurchaseOrder.objects.all()
     return render(request, 'purchase_orders.html', {'orders': orders})
 
-from .forms import PurchaseOrderForm
-
 # --- Procurement Officer: Create New Purchase Order ---
 @login_required
 def new_order(request):
@@ -196,10 +198,6 @@ def new_order(request):
         form = PurchaseOrderForm()
     return render(request, 'new_order.html', {'form': form})
 
-from .forms import PurchaseOrderForm
-
-from django.contrib.auth.models import User
-
 # --- Admin: View All User Accounts ---
 @login_required
 def account_list(request):
@@ -210,13 +208,79 @@ def account_list(request):
     users = User.objects.all().order_by('username')
     return render(request, 'account.html', {'users': users})
 
-from django.http import JsonResponse
-from .models import Request
+# ==========================================
+#       MOBILE APP API ENDPOINTS
+# ==========================================
+
+# --- API: Mobile Login ---
+@csrf_exempt
+def api_login(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
+            
+            user = authenticate(username=username, password=password)
+            
+            if user is not None:
+                return JsonResponse({
+                    'token': 'mobile-app-access-token-12345',
+                    'user_id': user.id,
+                    'message': 'Login Successful'
+                })
+            else:
+                return JsonResponse({'error': 'Invalid credentials'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+            
+    return JsonResponse({'error': 'POST request required'}, status=405)
 
 # --- API: Return Material Requests as JSON ---
-@login_required
 def api_request_list(request):
-    data = list(Request.objects.values(
-        'id', 'item_name', 'quantity', 'status', 'requester__username', 'date_requested'
-    ))
-    return JsonResponse({'requests': data})
+    # Note: Removed @login_required so mobile app can access it with dummy token
+    requests = Request.objects.all()
+    
+    # Map DB fields to Android Expected Fields
+    data = []
+    for r in requests:
+        data.append({
+            'material_id': r.id,
+            'material_name': r.item_name,      # Android expects 'material_name'
+            'current_stock': r.quantity,       # Android expects 'current_stock'
+            'procurement_status': r.status     # Android expects 'procurement_status'
+        })
+        
+    return JsonResponse(data, safe=False)
+
+# --- API: Submit Procurement Request ---
+@csrf_exempt
+def api_procure(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # Map Android keys to DB keys
+            item_name = data.get('material_name') 
+            quantity = data.get('current_stock')  
+            status = data.get('procurement_status')
+            
+            if not item_name or not quantity:
+                return JsonResponse({'error': 'Missing name or quantity'}, status=400)
+
+            # Assign to the first available user (fallback for dummy token)
+            requester_user = User.objects.filter(is_superuser=True).first() or User.objects.first()
+
+            new_req = Request.objects.create(
+                item_name=item_name,
+                quantity=quantity,
+                status=status or 'Pending',
+                requester=requester_user
+            )
+            
+            return JsonResponse({'message': 'Request created successfully', 'id': new_req.id})
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'POST request required'}, status=405)
