@@ -18,9 +18,6 @@ from .forms import (
     RequestForm, PurchaseOrderForm
 )
 
-# ==========================================
-#           WEB VIEWS (For Browser)
-# ==========================================
 
 # --- Custom Login View with Role-Based Redirect ---
 class CustomLoginView(LoginView):
@@ -213,10 +210,6 @@ def account_list(request):
     return render(request, 'account.html', {'users': users})
 
 
-# ==========================================
-#       MOBILE APP API ENDPOINTS
-# ==========================================
-
 # --- API: Mobile Login ---
 @csrf_exempt
 def api_login(request):
@@ -243,7 +236,7 @@ def api_login(request):
 
 # --- API: Return Material Requests as JSON ---
 def api_request_list(request):
-    # Note: Removed @login_required so mobile app can access it with dummy token
+   
     requests = Request.objects.all()
     
     # Map DB fields to Android Expected Fields
@@ -251,14 +244,14 @@ def api_request_list(request):
     for r in requests:
         data.append({
             'material_id': r.id,
-            'material_name': r.item_name,      # Android expects 'material_name'
-            'current_stock': r.quantity,       # Android expects 'current_stock'
-            'procurement_status': r.status     # Android expects 'procurement_status'
+            'material_name': r.item_name,      
+            'current_stock': r.quantity,       
+            'procurement_status': r.status     
         })
         
     return JsonResponse(data, safe=False)
 
-# --- API: Return Purchase Orders as JSON ---
+# API: Return Purchase Orders as JSON 
 def api_purchase_order_list(request):
     orders = PurchaseOrder.objects.all()
     
@@ -274,7 +267,7 @@ def api_purchase_order_list(request):
         
     return JsonResponse(data, safe=False)
 
-# --- API: Submit Procurement Request ---
+# API: Submit Procurement Request
 @csrf_exempt
 def api_procure(request):
     if request.method == 'POST':
@@ -289,7 +282,7 @@ def api_procure(request):
             if not item_name or not quantity:
                 return JsonResponse({'error': 'Missing name or quantity'}, status=400)
 
-            # Assign to the first available user (fallback for dummy token)
+            # Assign to the first available user 
             requester_user = User.objects.filter(is_superuser=True).first() or User.objects.first()
 
             new_req = Request.objects.create(
@@ -306,7 +299,7 @@ def api_procure(request):
 
     return JsonResponse({'error': 'POST request required'}, status=405)
 
-# --- API: Update Order Status ---
+# API Order Status
 @csrf_exempt
 def api_update_status(request, order_id):
     if request.method == 'POST':
